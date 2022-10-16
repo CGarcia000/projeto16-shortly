@@ -11,5 +11,12 @@ const connection = new Pool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
 });
+// const databaseConfig = {
+//     connectionString: process.env.DATABASE_URL,
+//     ssl: {
+//         rejectUnauthorized: true
+//     }
+// }
+// const connection = new Pool(databaseConfig);
 
 export default connection;

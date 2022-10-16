@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import dotenv from 'dotenv';
+dotenv.config();
 
 import connection from './db/psql.js';
 
@@ -16,7 +18,6 @@ server.use(express.json());
 server.use(router);
 
 
-server.listen(4000, () => {
-    console.log('Acessar http://localhost:4000');
-    console.log('Servidor executando na porta 4000');
+server.listen(process.env.PORT, () => {
+    console.log('Servidor executando na porta ' + process.env.PORT);
 })

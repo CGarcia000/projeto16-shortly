@@ -38,7 +38,7 @@ export async function urlShorten(req, res) {
             [
                 validation.value.url,
                 identifier,
-                session.id_user
+                session.id_user,
             ]
         );
         res.sendStatus(201);
@@ -79,12 +79,12 @@ export async function redirectUrl(req, res) {
 
     try {
         const { rows: url } = await connection.query(
-            `SELECT url, visits FROM public."url_shorten" WHERE identifier = $1 LIMIT 1;`,
+            `SELECT url, id_user, visits FROM public."url_shorten" WHERE identifier = $1 LIMIT 1;`,
             [shortUrl]
         );
         if (url.length > 0) {
+            // adicionando visit na url
             url[0].visits += 1;
-            console.log(url);
             await connection.query(
                 `UPDATE public."url_shorten" SET visits = $1 WHERE identifier = $2;`,
                 [
