@@ -9,8 +9,8 @@ export async function returnRanking(req, res) {
                 COUNT(url_shorten.*) as "linkCounts",
                 SUM(visits) as "visitsCount"  
             FROM
-                url_shorten
-                JOIN users ON users.id = url_shorten.id_user
+                public."url_shorten"
+                JOIN public."users" ON users.id = url_shorten.id_user
             GROUP BY
                 users.id,
                 users.name
