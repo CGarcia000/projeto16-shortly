@@ -5,7 +5,6 @@ import { urlSchema } from '../schemas/urls.schemas.js';
 
 
 export async function urlShorten(req, res) {
-    // TODO - adicionar o authorization middleware
     const { session } = res.locals;
 
     const validation = urlSchema.validate(req.body, { abortEarly: false });
@@ -52,13 +51,86 @@ export async function urlShorten(req, res) {
 }
 
 export async function returnUrl(req, res) {
-
+    const { id } = req.params;
+    try {
+        const { rows: url } = await connection.query(
+            `SELECT id, identifier, url FROM public."url_shorten" WHERE id = $1 LIMIT 1;`,
+            [id]
+        );
+        if (url.length > 0) {
+            res.status(200).send({
+                id: url[0].id,
+                shortUrl: url[0].identifier,
+                url: url[0].url,
+            })
+            return;
+        }
+        res.sendStatus(404);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+        return;
+    }
 }
 
 export async function redirectUrl(req, res) {
+    const { shortUrl } = req.params;
 
+    try {
+        const { rows: url } = await connection.query(
+            `SELECT url, visits FROM public."url_shorten" WHERE identifier = $1 LIMIT 1;`,
+            [shortUrl]
+        );
+        if (url.length > 0) {
+            url[0].visits += 1;
+            console.log(url);
+            await connection.query(
+                `UPDATE public."url_shorten" SET visits = $1 WHERE identifier = $2;`,
+                [
+                    url[0].visits,
+                    shortUrl,
+                ]
+            );
+            res.redirect(url[0].url);
+            return;
+        }
+        res.sendStatus(404);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+        return;
+    }
 }
 
 export async function deleteUrl(req, res) {
+    const { id } = req.params;
+    const { session } = res.locals;
 
+    try {
+        const { rows: userUrl } = await connection.query(
+            `SELECT id_user FROM public."url_shorten" WHERE id = $1 LIMIT 1;`,
+            [id]
+        );
+        if (userUrl.length > 0) {
+            if (userUrl[0].id_user !== session.id_user) {
+                res.status(401).send({ message: 'action not authorized' });
+                return;
+            }
+
+            await connection.query(
+                `DELETE FROM public."url_shorten" WHERE id = $1;`,
+                [id]
+            )
+            res.sendStatus(204);
+            return;
+        }
+        res.sendStatus(404);
+        return;
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+        return;
+    }
 }

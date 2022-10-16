@@ -7,7 +7,7 @@ import { authenticateToken } from "../middleware/authorizations.middleware.js";
 const urlRouter = express.Router();
 
 urlRouter.post('/urls/shorten', authenticateToken, urlControllers.urlShorten); //authenticated
-urlRouter.post('/urls/:id', urlControllers.returnUrl);
+urlRouter.get('/urls/:id', urlControllers.returnUrl);
 
 urlRouter.get('/urls/open/:shortUrl', urlControllers.redirectUrl);
 
